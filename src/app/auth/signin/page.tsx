@@ -17,7 +17,6 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, CheckCircle } from 'lucide-react'
 
-// ✅ Вынесли компонент который использует useSearchParams
 function SignInForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -25,7 +24,7 @@ function SignInForm() {
   const [error, setError] = useState('')
 
   const router = useRouter()
-  const searchParams = useSearchParams() // ✅ Теперь внутри Suspense
+  const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -145,7 +144,6 @@ function SignInForm() {
   )
 }
 
-// ✅ Главный компонент с Suspense boundary
 export default function SignInPage() {
   return (
     <Suspense

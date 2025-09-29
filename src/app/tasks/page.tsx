@@ -36,21 +36,19 @@ const priorityColors = {
 
 export default function TasksPage() {
   const { data: session, status } = useSession()
-  // tRPC запрос для получения списка задач
   const {
     data: tasks,
     isLoading,
     error,
   } = trpc.getTasks.useQuery(undefined, {
-    enabled: !!session, // Запрос только если есть сессия
-    refetchOnWindowFocus: false, // Не перезапрашивать при фокусе окна
-    staleTime: 30000, // Кеш на 30 секунд
+    enabled: !!session,
+    refetchOnWindowFocus: false,
+    staleTime: 30000,
   })
-  // tRPC запрос для получения статистики задач
   const { data: stats } = trpc.getTaskStats.useQuery(undefined, {
     enabled: !!session,
     refetchOnWindowFocus: false,
-    staleTime: 30000, // 30 seconds
+    staleTime: 30000,
   })
 
   if (status === 'loading') {
@@ -86,9 +84,7 @@ export default function TasksPage() {
       {/* Header */}
       <div className="bg-white shadow">
         <div className="container mx-auto px-4 py-4">
-          {/* Mobile-first responsive header */}
           <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center md:space-y-0">
-            {/* Top row - Navigation and title */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 md:space-x-4">
                 <Button variant="ghost" size="sm" asChild>
@@ -102,7 +98,6 @@ export default function TasksPage() {
                   My Tasks
                 </h1>
               </div>
-              {/* Mobile new task button */}
               <Button asChild size="sm" className="md:hidden">
                 <Link href="/tasks/new">
                   <Plus className="h-4 w-4" />
@@ -110,7 +105,6 @@ export default function TasksPage() {
               </Button>
             </div>
 
-            {/* Bottom row - User info and desktop new task button */}
             <div className="flex items-center justify-between md:justify-end md:space-x-4">
               <div className="flex items-center space-x-2 text-gray-600 text-sm">
                 <User className="h-4 w-4" />
@@ -118,7 +112,6 @@ export default function TasksPage() {
                   {session.user?.name || session.user?.email}
                 </span>
               </div>
-              {/* Desktop new task button */}
               <Button asChild className="hidden md:flex">
                 <Link href="/tasks/new">
                   <Plus className="h-4 w-4 mr-2" />
@@ -213,60 +206,74 @@ export default function TasksPage() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {tasks.map(task => (
-              <Card key={task.id} className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg mb-2">
-                        <Link
-                          href={`/tasks/${task.id}`}
-                          className="hover:text-blue-600 transition-colors"
-                        >
-                          {task.title}
-                        </Link>
-                      </CardTitle>
-                      {task.description && (
-                        <CardDescription className="text-sm">
-                          {task.description}
-                        </CardDescription>
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-2 ml-4">
-                      <Badge
-                        variant="outline"
-                        className={priorityColors[task.priority]}
-                      >
-                        {task.priority}
-                      </Badge>
-                      <Badge className={statusColors[task.status]}>
-                        {task.status.replace('_', ' ')}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        Created:{' '}
-                        {format(new Date(task.created_at), 'MMM dd, yyyy')}
+            {tasks.map(
+              (task: {
+                id: string
+                title: string
+                description?: string
+                priority: keyof typeof priorityColors
+                status: keyof typeof statusColors
+                created_at: string
+                due_date?: string
+              }) => (
+                <Card
+                  key={task.id}
+                  className="hover:shadow-md transition-shadow"
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg mb-2">
+                          <Link
+                            href={`/tasks/${task.id}`}
+                            className="hover:text-blue-600 transition-colors"
+                          >
+                            {task.title}
+                          </Link>
+                        </CardTitle>
+                        {task.description && (
+                          <CardDescription className="text-sm">
+                            {task.description}
+                          </CardDescription>
+                        )}
                       </div>
-                      {task.due_date && (
+                      <div className="flex items-center space-x-2 ml-4">
+                        <Badge
+                          variant="outline"
+                          className={priorityColors[task.priority]}
+                        >
+                          {task.priority}
+                        </Badge>
+                        <Badge className={statusColors[task.status]}>
+                          {task.status.replace('_', ' ')}
+                        </Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                      <div className="flex items-center space-x-4">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1" />
-                          Due: {format(new Date(task.due_date), 'MMM dd, yyyy')}
+                          Created:{' '}
+                          {format(new Date(task.created_at), 'MMM dd, yyyy')}
                         </div>
-                      )}
+                        {task.due_date && (
+                          <div className="flex items-center">
+                            <Calendar className="h-4 w-4 mr-1" />
+                            Due:{' '}
+                            {format(new Date(task.due_date), 'MMM dd, yyyy')}
+                          </div>
+                        )}
+                      </div>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href={`/tasks/${task.id}`}>View Details</Link>
+                      </Button>
                     </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/tasks/${task.id}`}>View Details</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              )
+            )}
           </div>
         )}
       </div>

@@ -2,6 +2,13 @@ import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { supabase } from '@/lib/supabase'
 
+// ✅ Добавляем тип для пользователя из базы
+type DatabaseUser = {
+  id: string
+  email: string
+  name: string | null
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -35,25 +42,32 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Invalid email or password')
           }
 
-          // ✅ Получаем данные пользователя из таблицы users
-          const { data: userData, error: userError } = await supabase
+          // ✅ Получаем данные пользователя из таблицы users с явной типизацией
+          const { data: userData, error: userError } = (await supabase
             .from('users')
             .select('id, email, name')
             .eq('id', data.user.id)
-            .single()
+            .single()) as { data: DatabaseUser | null; error: unknown } // ✅ Заменил any на unknown
 
-          if (userError || !userData) {
-            console.log('User not found in users table, using auth data')
+          // ✅ Определяем имя пользователя
+          let userName = 'User'
+
+          if (userData && !userError) {
+            userName = userData.name || 'User'
+          } else if (data.user.user_metadata?.name) {
+            userName = data.user.user_metadata.name
           }
 
-          // ✅ Возвращаем пользователя без image
+          // ✅ Возвращаем пользователя
           return {
             id: data.user.id,
             email: data.user.email!,
-            name: userData?.name || data.user.user_metadata?.name || 'User',
+            name: userName,
           }
-        } catch (error: any) {
-          console.log('Auth error:', error.message)
+        } catch (error: unknown) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Authentication failed'
+          console.log('Auth error:', errorMessage)
           throw new Error('Invalid email or password')
         }
       },

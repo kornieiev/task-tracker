@@ -1,7 +1,5 @@
 'use client'
 
-// !
-
 import { useState, useEffect, use } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -73,8 +71,6 @@ export default function TaskPage({ params }: TaskPageProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const resolvedParams = use(params)
-  console.log('🚀 ~ TaskPage ~ resolvedParams:', resolvedParams)
-  // ?зачем use(params), если можно прочитать taskId из query?
 
   const taskId = resolvedParams.id
 
@@ -103,7 +99,6 @@ export default function TaskPage({ params }: TaskPageProps) {
 
   const [errors, setErrors] = useState<Partial<FormData>>({})
 
-  // Update form data when task loads
   useEffect(() => {
     if (task) {
       setFormData({
@@ -331,7 +326,9 @@ export default function TaskPage({ params }: TaskPageProps) {
                     variant="outline"
                     className={
                       priorityColors[
-                        isEditing ? formData.priority : task.priority
+                        (isEditing
+                          ? formData.priority
+                          : task.priority) as keyof typeof priorityColors
                       ]
                     }
                   >
@@ -339,7 +336,11 @@ export default function TaskPage({ params }: TaskPageProps) {
                   </Badge>
                   <Badge
                     className={
-                      statusColors[isEditing ? formData.status : task.status]
+                      statusColors[
+                        (isEditing
+                          ? formData.status
+                          : task.status) as keyof typeof statusColors
+                      ]
                     }
                   >
                     {(isEditing ? formData.status : task.status).replace(

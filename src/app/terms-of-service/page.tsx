@@ -1,5 +1,3 @@
-// !
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -123,7 +121,6 @@ export default async function TermsOfServicePage() {
         <Card className="mb-8">
           <CardContent className="p-6">
             <div className="prose max-w-none">
-              {/* Просто отображаем контент как обычный текст с переносами строк */}
               <pre className="whitespace-pre-wrap text-gray-700 leading-relaxed font-sans">
                 {latestDocument.content}
               </pre>

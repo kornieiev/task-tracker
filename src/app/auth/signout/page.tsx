@@ -1,11 +1,8 @@
 'use client'
 
-// !
-
-// Импорты для работы с клиентскими функциями
 import { useEffect } from 'react'
-import { signOut } from 'next-auth/react' // Функция выхода из NextAuth.js
-import { useRouter } from 'next/navigation' // Навигация в App Router
+import { signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import {
   Card,
   CardContent,
@@ -17,34 +14,24 @@ import { Button } from '@/components/ui/button'
 import { Loader2, LogOut } from 'lucide-react'
 
 export default function SignOutPage() {
-  // Получаем объект роутера для программной навигации
   const router = useRouter()
 
-  // useEffect - выполняется после монтирования компонента
   useEffect(() => {
-    // Auto-sign out after a short delay for better UX
-    // Создаем таймер на 2 секунды для автоматического выхода
-    // Это дает пользователю время прочитать сообщение и передумать
     const timer = setTimeout(() => {
-      handleSignOut() // Автоматически выполняем выход через 2 секунды
+      handleSignOut()
     }, 2000)
-
     return () => clearTimeout(timer)
-  }, []) // Пустой массив зависимостей = выполнить только один раз при монтировании
+  }, [])
 
-  // Асинхронная функция для выполнения выхода из системы
   const handleSignOut = async () => {
     await signOut({
-      callbackUrl: '/', // После выхода перенаправить на главную страницу
-      redirect: true, // Автоматически выполнить редирект
+      callbackUrl: '/',
+      redirect: true,
     })
-    // После выполнения signOut пользователь будет перенаправлен на '/'
-    // Сессия будет очищена, JWT токен удален
   }
 
-  // Функция отмены - возвращает пользователя на предыдущую страницу
   const handleCancel = () => {
-    router.back() // Переход назад в истории браузера (как кнопка "Назад")
+    router.back()
   }
 
   return (

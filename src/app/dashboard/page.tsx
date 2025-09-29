@@ -1,9 +1,7 @@
 'use client'
 
-// !
-
-import { useSession } from 'next-auth/react' // Хук для получения сессии пользователя
-import { trpc } from '@/lib/trpc/client' // tRPC клиент для типизированных API вызовов
+import { useSession } from 'next-auth/react'
+import { trpc } from '@/lib/trpc/client'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -17,30 +15,22 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 
 export default function DashboardPage() {
-  // СОСТОЯНИЕ АУТЕНТИФИКАЦИИ
-  // Получаем данные сессии и статус загрузки из NextAuth.js
   const { data: session, status } = useSession()
 
-  // ЗАПРОС СТАТИСТИКИ ЗАДАЧ
-  // tRPC хук для получения статистики (общее количество, завершенные, процент выполнения)
   const { data: stats, isLoading: statsLoading } = trpc.getTaskStats.useQuery(
-    undefined, // Параметры запроса (не требуются)
+    undefined,
     {
-      enabled: !!session, // Выполнять запрос только если пользователь авторизован
+      enabled: !!session,
     }
   )
 
-  // ЗАПРОС СПИСКА ЗАДАЧ
-  // tRPC хук для получения всех задач пользователя
   const { data: tasks, isLoading: tasksLoading } = trpc.getTasks.useQuery(
-    undefined, // Параметры запроса (не требуются)
+    undefined,
     {
-      enabled: !!session, // Выполнять запрос только если пользователь авторизован
+      enabled: !!session,
     }
   )
 
-  // СОСТОЯНИЕ ЗАГРУЗКИ АУТЕНТИФИКАЦИИ
-  // Показываем спиннер пока NextAuth.js проверяет сессию
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -49,8 +39,6 @@ export default function DashboardPage() {
     )
   }
 
-  // ЗАЩИТА ОТ НЕАВТОРИЗОВАННОГО ДОСТУПА
-  // Если сессии нет - показываем экран доступа запрещен
   if (!session) {
     return (
       <div className="min-h-screen flex items-center justify-center">

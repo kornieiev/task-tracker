@@ -1,6 +1,3 @@
-// "use client"
-// ! Temporary use client component, until not added redirecting after real signup
-
 import Link from 'next/link'
 import {
   Card,
