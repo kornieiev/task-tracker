@@ -10,7 +10,7 @@ A modern, full-stack task management application built with Next.js 15, tRPC, Su
 
 ## 🚀 Live Demo
 
-**Production:** [https://task-tracker-omxengjjj-kornieiev-ds-projects.vercel.app](https://task-tracker-omxengjjj-kornieiev-ds-projects.vercel.app)
+**Production:** [https://task-tracker-five-ruddy.vercel.app/](https://task-tracker-five-ruddy.vercel.app/)
 
 ### Demo Credentials
 
