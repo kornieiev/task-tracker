@@ -46,7 +46,7 @@ const faqData = [
       },
       {
         q: 'How does login work?',
-        a: 'Use the demo accounts: Lola@mail.com or Leo@mail.com with password123.',
+        a: 'Use the demo accounts: lola@mail.com or leo@mail.com with qweqwe.',
       },
     ],
   },

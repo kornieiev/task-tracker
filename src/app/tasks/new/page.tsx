@@ -83,6 +83,16 @@ export default function NewTaskPage() {
       newErrors.description = 'Description must be less than 1000 characters'
     }
 
+    if (!formData.due_date) {
+      newErrors.due_date = 'Due date is required'
+    } else {
+      const selectedDate = new Date(formData.due_date)
+      const now = new Date()
+      if (selectedDate <= now) {
+        newErrors.due_date = 'Due date must be in the future'
+      }
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -98,9 +108,7 @@ export default function NewTaskPage() {
         description: formData.description.trim() || undefined,
         status: formData.status,
         priority: formData.priority,
-        due_date: formData.due_date
-          ? new Date(formData.due_date).toISOString()
-          : undefined,
+        due_date: new Date(formData.due_date).toISOString(),
       }
 
       await createTaskMutation.mutateAsync(taskData)
@@ -115,6 +123,21 @@ export default function NewTaskPage() {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }))
     }
+  }
+
+  const canSubmit = () => {
+    if (
+      !formData.title.trim() ||
+      !formData.due_date ||
+      createTaskMutation.isPending
+    ) {
+      return false
+    }
+
+    const selectedDate = new Date(formData.due_date)
+    const now = new Date()
+
+    return selectedDate > now
   }
 
   return (
@@ -251,7 +274,7 @@ export default function NewTaskPage() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={createTaskMutation.isPending}
+                  disabled={!canSubmit()}
                   className="w-full sm:w-auto sm:min-w-[120px]"
                 >
                   {createTaskMutation.isPending ? (

@@ -1,81 +1,88 @@
-import { NextAuthOptions } from 'next-auth'
+import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import { supabase } from '@/lib/supabase'
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
+      id: 'credentials',
       name: 'credentials',
       credentials: {
         email: {
           label: 'Email',
           type: 'email',
-          placeholder: 'Enter your email',
+          placeholder: 'lola@mail.com',
         },
         password: {
           label: 'Password',
           type: 'password',
-          placeholder: 'Enter your password',
+          placeholder: 'qweqwe',
         },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null
+          throw new Error('Email and password required')
         }
 
-        // Mock authentication for development
-        const mockUsers = [
-          {
-            id: '550e8400-e29b-41d4-a716-446655440001',
-            email: 'Lola@mail.com',
-            name: 'Lola',
-            password: 'password123',
-          },
-          {
-            id: '550e8400-e29b-41d4-a716-446655440002',
-            email: 'Leo@mail.com',
-            name: 'Leo',
-            password: 'password123',
-          },
-        ]
+        try {
+          // ✅ Аутентификация через Supabase Auth
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: credentials.email.toLowerCase(),
+            password: credentials.password,
+          })
 
-        const user = mockUsers.find(
-          u =>
-            u.email.toLowerCase() === credentials.email.toLowerCase() &&
-            u.password === credentials.password
-        )
-
-        if (user) {
-          console.log('Demo mode: User authenticated:', user.email)
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
+          if (error || !data.user) {
+            throw new Error('Invalid email or password')
           }
-        }
 
-        return null
+          // ✅ Получаем данные пользователя из таблицы users
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('id, email, name')
+            .eq('id', data.user.id)
+            .single()
+
+          if (userError || !userData) {
+            console.log('User not found in users table, using auth data')
+          }
+
+          // ✅ Возвращаем пользователя без image
+          return {
+            id: data.user.id,
+            email: data.user.email!,
+            name: userData?.name || data.user.user_metadata?.name || 'User',
+          }
+        } catch (error: any) {
+          console.log('Auth error:', error.message)
+          throw new Error('Invalid email or password')
+        }
       },
     }),
   ],
-  session: {
-    strategy: 'jwt',
-  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
+        token.email = user.email
+        token.name = user.name
       }
       return token
     },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string
+        session.user.email = token.email as string
+        session.user.name = token.name as string
       }
       return session
     },
   },
   pages: {
     signIn: '/auth/signin',
-    signOut: '/auth/signout',
+    error: '/auth/error',
   },
+  session: {
+    strategy: 'jwt',
+  },
+  secret: process.env.NEXTAUTH_SECRET,
 }

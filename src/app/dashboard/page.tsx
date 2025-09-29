@@ -266,13 +266,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
-
-        <div className="mt-8 text-center text-gray-500">
-          <p>
-            💡 This is a demo dashboard. In the next phase, we&apos;ll connect
-            real data from the database.
-          </p>
-        </div>
       </div>
     </div>
   )
