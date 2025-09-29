@@ -56,7 +56,7 @@ INSERT INTO tasks (title, description, user_id, completed) VALUES
     false
 ) ON CONFLICT DO NOTHING;
 
--- Insert FAQ data for SSG page
+-- Insert FAQ data
 INSERT INTO terms_of_service (title, content, version, effective_date) VALUES 
 (
     'Frequently Asked Questions',

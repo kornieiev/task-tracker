@@ -197,19 +197,9 @@ export default function DashboardPage() {
                 className="w-full justify-start"
                 asChild
               >
-                <Link href="/rendering-examples">
-                  <CheckSquare className="mr-2 h-4 w-4" />
-                  Rendering Examples
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                asChild
-              >
                 <Link href="/faq">
                   <CheckSquare className="mr-2 h-4 w-4" />
-                  FAQ (SSG Demo)
+                  FAQ
                 </Link>
               </Button>
               <Button
@@ -219,7 +209,7 @@ export default function DashboardPage() {
               >
                 <Link href="/terms-of-service">
                   <CheckSquare className="mr-2 h-4 w-4" />
-                  Terms of Service (SSR)
+                  Terms of Service
                 </Link>
               </Button>
             </CardContent>

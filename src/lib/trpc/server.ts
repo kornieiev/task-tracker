@@ -2,16 +2,16 @@ import { initTRPC, TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { supabase } from '@/lib/supabase'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '../auth/config'
 
 // Создаем контекст для tRPC
 export const createTRPCContext = async () => {
   const session = await getServerSession(authOptions)
-  
+
   return {
     session,
     supabase,
-    userId: session?.user?.email // В demo режиме используем email как ID
+    userId: session?.user?.email, // В demo режиме используем email как ID
   }
 }
 
@@ -71,50 +71,62 @@ type Task = {
 }
 
 const mockTasks = new Map<string, Task>([
-  ['task-1', {
-    id: 'task-1',
-    title: 'Setup Development Environment',
-    description: 'Install Node.js, Next.js and configure the project',
-    status: 'completed',
-    priority: 'high',
-    due_date: '2024-12-30T12:00:00Z',
-    created_at: '2024-12-20T10:00:00Z',
-    updated_at: '2024-12-22T14:00:00Z',
-    user_id: 'demo-user',
-  }],
-  ['task-2', {
-    id: 'task-2',
-    title: 'Design Database Schema',
-    description: 'Create tables for users, tasks, and authentication',
-    status: 'completed',
-    priority: 'high',
-    due_date: '2024-12-31T12:00:00Z',
-    created_at: '2024-12-22T10:00:00Z',
-    updated_at: '2024-12-23T16:00:00Z',
-    user_id: 'demo-user',
-  }],
-  ['task-3', {
-    id: 'task-3',
-    title: 'Implement Authentication',
-    description: 'Setup NextAuth.js with credentials provider',
-    status: 'in_progress',
-    priority: 'high',
-    due_date: '2025-01-02T12:00:00Z',
-    created_at: '2024-12-23T10:00:00Z',
-    updated_at: '2024-12-25T12:00:00Z',
-    user_id: 'demo-user',
-  }],
-  ['task-4', {
-    id: 'task-4',
-    title: 'Create Task Management UI',
-    description: 'Build forms and components for CRUD operations',
-    status: 'todo',
-    priority: 'medium',
-    due_date: '2025-01-05T12:00:00Z',
-    created_at: '2024-12-25T10:00:00Z',
-    updated_at: '2024-12-25T10:00:00Z',
-    user_id: 'demo-user',
-  }],
+  [
+    'task-1',
+    {
+      id: 'task-1',
+      title: 'Setup Development Environment',
+      description: 'Install Node.js, Next.js and configure the project',
+      status: 'completed',
+      priority: 'high',
+      due_date: '2024-12-30T12:00:00Z',
+      created_at: '2024-12-20T10:00:00Z',
+      updated_at: '2024-12-22T14:00:00Z',
+      user_id: 'demo-user',
+    },
+  ],
+  [
+    'task-2',
+    {
+      id: 'task-2',
+      title: 'Design Database Schema',
+      description: 'Create tables for users, tasks, and authentication',
+      status: 'completed',
+      priority: 'high',
+      due_date: '2024-12-31T12:00:00Z',
+      created_at: '2024-12-22T10:00:00Z',
+      updated_at: '2024-12-23T16:00:00Z',
+      user_id: 'demo-user',
+    },
+  ],
+  [
+    'task-3',
+    {
+      id: 'task-3',
+      title: 'Implement Authentication',
+      description: 'Setup NextAuth.js with credentials provider',
+      status: 'in_progress',
+      priority: 'high',
+      due_date: '2025-01-02T12:00:00Z',
+      created_at: '2024-12-23T10:00:00Z',
+      updated_at: '2024-12-25T12:00:00Z',
+      user_id: 'demo-user',
+    },
+  ],
+  [
+    'task-4',
+    {
+      id: 'task-4',
+      title: 'Create Task Management UI',
+      description: 'Build forms and components for CRUD operations',
+      status: 'todo',
+      priority: 'medium',
+      due_date: '2025-01-05T12:00:00Z',
+      created_at: '2024-12-25T10:00:00Z',
+      updated_at: '2024-12-25T10:00:00Z',
+      user_id: 'demo-user',
+    },
+  ],
 ])
 
 // Основной router
@@ -132,7 +144,10 @@ export const appRouter = router({
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
       const task = mockTasks.get(input.id)
-      if (!task || (task.user_id !== ctx.userId && task.user_id !== 'demo-user')) {
+      if (
+        !task ||
+        (task.user_id !== ctx.userId && task.user_id !== 'demo-user')
+      ) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' })
       }
       return task
@@ -144,7 +159,7 @@ export const appRouter = router({
     .mutation(async ({ input, ctx }) => {
       const now = new Date().toISOString()
       const taskId = `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-      
+
       const newTask: Task = {
         id: taskId,
         title: input.title,
@@ -159,19 +174,25 @@ export const appRouter = router({
 
       mockTasks.set(taskId, newTask)
       console.log('Created task:', newTask)
-      
+
       return newTask
     }),
 
   // Обновить задачу
   updateTask: protectedProcedure
-    .input(z.object({
-      id: z.string(),
-      data: UpdateTaskSchema,
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+        data: UpdateTaskSchema,
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       const existingTask = mockTasks.get(input.id)
-      if (!existingTask || (existingTask.user_id !== ctx.userId && existingTask.user_id !== 'demo-user')) {
+      if (
+        !existingTask ||
+        (existingTask.user_id !== ctx.userId &&
+          existingTask.user_id !== 'demo-user')
+      ) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' })
       }
 
@@ -185,7 +206,7 @@ export const appRouter = router({
 
       mockTasks.set(input.id, updatedTask)
       console.log('Updated task:', updatedTask)
-      
+
       return updatedTask
     }),
 
@@ -194,13 +215,16 @@ export const appRouter = router({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }) => {
       const task = mockTasks.get(input.id)
-      if (!task || (task.user_id !== ctx.userId && task.user_id !== 'demo-user')) {
+      if (
+        !task ||
+        (task.user_id !== ctx.userId && task.user_id !== 'demo-user')
+      ) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found' })
       }
 
       mockTasks.delete(input.id)
       console.log('Deleted task:', input.id)
-      
+
       return { success: true, id: input.id }
     }),
 
@@ -209,10 +233,14 @@ export const appRouter = router({
     const userTasks = Array.from(mockTasks.values()).filter(
       task => task.user_id === ctx.userId || task.user_id === 'demo-user'
     )
-    
+
     const total = userTasks.length
-    const completed = userTasks.filter(task => task.status === 'completed').length
-    const inProgress = userTasks.filter(task => task.status === 'in_progress').length
+    const completed = userTasks.filter(
+      task => task.status === 'completed'
+    ).length
+    const inProgress = userTasks.filter(
+      task => task.status === 'in_progress'
+    ).length
     const todo = userTasks.filter(task => task.status === 'todo').length
     const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0
 
